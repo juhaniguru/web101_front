@@ -49,10 +49,18 @@
     <main role="main">
 
       <div class="container">
+
+        <form id="editProjectForm">
         
-        <h1 id="name"></h1>
-        <hr>
-        <p id="description">Loading</p>
+          <p>
+            <input class="input form-control" type="text" id="name" placeholder="project name"  required />
+          </p>
+          <hr>
+          <p>
+            <input class="input form-control" type="text" id="description" placeholder="project description" required />
+          </p>
+          <button type="submit" class="btn btn-sm btn-primary">Update</button>
+        </form>
 
         <hr>
 
@@ -110,7 +118,7 @@
   document.addEventListener('DOMContentLoaded', function(e){
 
 
-      var canRemove = true
+      
 
       if(window.localStorage.getItem('token'))
       {
@@ -130,18 +138,25 @@
           
           var project = projectRes.data;
 
+          var editProjectForm = document.querySelector("#editProjectForm");
+          console.log(editProjectForm)
+
+          editProjectForm.addEventListener('submit', function(e) {
+           
+            e.preventDefault();
+            updateProjet(project);
+          }) 
 
 
-
-          document.querySelector("#name").innerHTML = project.name;
-          document.querySelector("#description").innerHTML = project.description;
+          document.querySelector("#name").value = project.name;
+          document.querySelector("#description").value = project.description;
 
 
 
           document.querySelector('#newTaskForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            console.log("########### newTaskForm::submit")
+           
 
             var addTaskForm = this;
 
@@ -174,7 +189,13 @@
   })
 
   
+  var updateProjet = function(project)
+  {
+    var name = document.querySelector("#name").value;
+    var description = document.querySelector('#description').value;
 
+    console.log(project.id, name, description)
+  }
 
   var init = function(projectId, headers, project, authUser)
   {
@@ -309,7 +330,7 @@
                         
                       });
 
-                      
+
                       if(t.isEditable !== true && t.done == 0)
                       {
                         li.appendChild(i)
