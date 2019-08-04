@@ -69,16 +69,17 @@
           <li id="placeholder" class="list-group-item disabled" aria-disabled="true">Loading</li>  
 
         </ul>
+              <hr>
+              <form id="newTaskForm" style="margin-top:2em">
 
-          <form>
-  
-  <div class="form-group">
-    <label for="taskDescription">New Description</label>
-    <input type="text" class="form-control" id="taskDescription" placeholder="New Description" required>
-  </div>
-  
-  <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-</form>
+      
+      <div class="form-group">
+        <label for="taskDescription">New Description</label>
+        <input type="text" class="form-control" id="taskDescription" placeholder="New Description" required>
+      </div>
+      
+      <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+    </form>
 
       </div>
 
@@ -137,8 +138,10 @@
 
 
 
-          document.querySelector('form').addEventListener('submit', function(e) {
+          document.querySelector('#newTaskForm').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            console.log("########### newTaskForm::submit")
 
             var addTaskForm = this;
 
@@ -170,6 +173,8 @@
       }
   })
 
+  
+
 
   var init = function(projectId, headers, project, authUser)
   {
@@ -181,7 +186,8 @@
             if(tasks.length == 0) // show placeholder text if no tasks
             {
               document.querySelector("#placeholder").innerText = 'No tasks'
-            } else {
+            } else 
+            {
               var tasksList = document.querySelector(".list-group")
               tasksList.innerHTML = '';
              tasks.forEach(function(t) {
@@ -199,7 +205,7 @@
                   checkbox.classList.add('float-right')
                   checkbox.value = t.id
 
-                  li.addEventListener('change', function(e) { // to toggle done of a task
+                  checkbox.addEventListener('change', function(e) { // to toggle done of a task
                       var done = e.target.checked === true ? 1 : 0;
                       axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {done}, headers).then(function(toggleDoneRes) {
                          if(done == 1)
@@ -222,34 +228,123 @@
 
                     if(authUser.id == project.manager_id || authUser.role == 'admin')
                     {
-                      var i = document.createElement('li');
+
+                      var i = document.createElement('i');
 
                       i.classList.add('fas');
                       i.classList.add('fa-pen');
                       i.classList.add('float-right')
                       i.classList.add('margin-right-1')
 
-                      i.addEventListener('click', function(){
-                        window.location.href = `http://localhost:8001/projects/edit.html?project=${project.id}`
-                      });
+                    /*  i.addEventListener('click', function(){
+                        t.isEditable = true
+                        var editTaskDescriptionForm = document.createElement('form')
+                        var textInput = document.createElement('input')
+                        textInput.type = 'text';
+                        textInput.classList.add('form-control')
+                        textInput.value = t.description;
+                        editTaskDescriptionForm.appendChild(textInput)
 
-                      li.appendChild(i)
+                        editTaskDescriptionForm.addEventListener('submit', function(e) {
+                          e.preventDefault();
+
+                          axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {description: textInput.value}, headers).then(function() {
+                            init(project.id, headers, project, authUser)
+                          }).catch(function(patchTaskErr) {
+                            console.log(patchTaskErr)
+                          })
+                           
+
+                           
+                        });
+
+                        textInput.addEventListener('keyup', function(e) { // listen to esc key stroke to cancel editing the task
+                          if(e.keyCode == 27){
+                            console.log("cancel")
+                          }
+                        })
+
+
+                        li.innerHTML = '';
+                        li.appendChild(editTaskDescriptionForm);
+
+                      }); */
+                      if(t.isEditable !== true)
+                      {
+                        li.appendChild(i)
+                      }
+
+
+                      li.addEventListener('mouseleave', function(e){ // to remove pen from list item
+
+                      
+
+                        var i = this.querySelector('.fas');
+                        if(i != null)
+                        {
+                          li.removeChild(i)
+                        }
+                    
+                    })
+
+
+                    i.addEventListener('click', function(){
+
+
+
+                        t.isEditable = true
+                        var editTaskDescriptionForm = document.createElement('form')
+                        var textInput = document.createElement('input')
+                        textInput.type = 'text';
+                        textInput.classList.add('form-control')
+                        textInput.value = t.description;
+                        editTaskDescriptionForm.appendChild(textInput)
+
+                        editTaskDescriptionForm.addEventListener('submit', function(e) {
+                          e.preventDefault();
+
+                          axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {description: textInput.value}, headers).then(function() {
+                            init(project.id, headers, project, authUser)
+                          }).catch(function(patchTaskErr) {
+                            console.log(patchTaskErr)
+                          })
+                           
+
+                           
+                        });
+
+                        textInput.addEventListener('keyup', function(e) { // listen to esc key stroke to cancel editing the task
+                          if(e.keyCode == 27){
+                            init(project.id, headers, project, authUser)
+                          }
+                        })
+
+
+                        li.innerHTML = '';
+                        li.appendChild(editTaskDescriptionForm);
+                        
+                        
+                      });  
+
                      
-                    }
+                    } // if(project.manager_id == authUser.id || authUser.role == 'admin')
 
-                  });
 
-                  li.addEventListener('mouseleave', function(e){ // to remove pen from list item
+                    
 
-                      var i = this.querySelector('.fas');
-                      li.removeChild(i)
+                });
+
                   
-                  })
 
 
 
                   li.appendChild(checkbox)
-                }
+
+
+
+
+
+                } 
                 
                 tasksList.appendChild(li)
                 
