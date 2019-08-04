@@ -1,0 +1,263 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Web 101 - Projects</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="../projects.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    
+  </head>
+
+  <body>
+
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Navbar</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Features</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Pricing</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+    </header>
+
+    <main role="main">
+
+      <div class="container">
+        
+        <h1 id="name"></h1>
+        <hr>
+        <p id="description">Loading</p>
+
+        <hr>
+
+        <h2>Tasks</h2>
+
+
+        <ul class="list-group">
+          <!--li class="list-group-item disabled" aria-disabled="true">Cras justo odio</li>
+          <li class="list-group-item">Dapibus ac facilisis in</li>
+          <li class="list-group-item">Morbi leo risus</li>
+          <li class="list-group-item">Porta ac consectetur ac</li>
+          <li class="list-group-item">Vestibulum at eros</li-->
+
+          <li id="placeholder" class="list-group-item disabled" aria-disabled="true">Loading</li>  
+
+        </ul>
+          <div class="btn-group" role="group" style="margin-top:1em;">
+           Loading
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="text-muted">
+      <div class="container">
+        <p class="float-right">
+          <a href="#">Back to top</a>
+        </p>
+       
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+<script type="text/javascript" src="../auth.js"></script>
+
+<script>
+
+
+
+  document.addEventListener('DOMContentLoaded', function(e){
+
+
+     
+
+      if(window.localStorage.getItem('token'))
+      {
+
+
+
+        auth.user(function(authUser) {
+
+          var headers = {
+            headers: {Authorization: `Bearer ${window.localStorage.getItem('token')}`}
+          };
+
+          var urlParams = new URLSearchParams(window.location.search);
+          var projectId = urlParams.get('project');
+
+         axios.get(`http://localhost:8000/api/projects/${projectId}`, headers).then(function(projectRes) {
+          
+          var project = projectRes.data;
+
+          if(authUser.id == project.manager_id || authUser.role == 'admin')
+          {
+            var deleteButton = document.createElement('button')
+
+            deleteButton.type = 'button';
+            deleteButton.classList.add('btn')
+            deleteButton.classList.add('btn-sm')
+            deleteButton.classList.add('btn-danger')
+
+            deleteButton.addEventListener('click', function(){
+              axios.delete(`http://localhost:8000/api/projects/${project.id}`, headers).then(function(destroyRes) {
+                if(destroyRes.data.destroyed == true)
+                {
+                   window.location.href = 'http://localhost:8001/projects/'
+                }
+              }).catch(function(deleteErr) {console.log(deleteErr)})
+            });
+
+            var deleteIcon = document.createElement('i');
+            deleteIcon.classList.add('fas')
+            deleteIcon.classList.add('fa-trash')
+            deleteIcon.setAttribute('aria-hidden', 'true');
+
+            deleteButton.appendChild(deleteIcon);
+
+            var editButton = document.createElement('a')
+            editButton.type = 'button'
+            editButton.role = 'button'
+            editButton.href = `http://localhost:8001/projects/edit.html?project=${project.id}`
+            editButton.classList.add('btn')
+            editButton.classList.add('btn-sm')
+            editButton.classList.add('btn-primary')
+            editButton.classList.add('color-white')
+
+            var editIcon = document.createElement('i')
+            editIcon.classList.add('fas')
+            editIcon.classList.add('fa-pen')
+
+            editButton.appendChild(editIcon)
+
+            document.querySelector('.btn-group').innerHTML = '';
+
+            document.querySelector('.btn-group').appendChild(deleteButton)
+            document.querySelector('.btn-group').appendChild(editButton)
+
+
+          }
+
+          /*
+
+          
+          <button type="button" class="btn btn-sm btn-danger">
+            <i class="fas fa-trash" aria-hidden="true"></i> 
+          </button>
+          <a type="button" class="btn btn-sm btn-primary color-white">
+            <i class="fas fa-pen" aria-hidden="true"></i> 
+          </a>
+
+
+          */
+
+          document.querySelector("#name").innerHTML = project.name;
+          document.querySelector("#description").innerHTML = project.description;
+
+          axios.get(`http://localhost:8000/api/projects/${projectId}/tasks`, headers).then(function(tasksRes) {
+            let tasks = tasksRes.data;
+
+            if(tasks.length == 0)
+            {
+              document.querySelector("#placeholder").innerText = 'No tasks'
+            } else {
+              var tasksList = document.querySelector(".list-group")
+              tasksList.innerHTML = '';
+             tasks.forEach(function(t) {
+                var li =  document.createElement('li');
+                li.classList.add('list-group-item')
+                var projectDescriptionTextNode = document.createTextNode(t.description);
+                li.appendChild(projectDescriptionTextNode);
+
+                if(project.manager_id == authUser.id || authUser.role == 'admin')
+                {
+                  var checkbox = document.createElement('input');
+                  checkbox.type = 'checkbox';
+
+                  checkbox.classList.add('input');
+                  checkbox.classList.add('float-right')
+                  checkbox.value = t.id
+
+                  li.addEventListener('change', function(e) {
+                      var done = e.target.checked === true ? 1 : 0;
+                      axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {done}, headers).then(function(toggleDoneRes) {
+                         if(done == 1)
+                         {
+                            li.classList.add('done')
+                            li.classList.add('disabled')
+                         } else {
+                          li.classList.remove('done')
+                          li.classList.remove('disabled')
+                         }
+                      }).catch(function(toggleDoneErr) {
+                        console.log(toggleDoneErr);
+                      })
+                      
+                  });
+
+                  
+
+
+
+                  li.appendChild(checkbox)
+                }
+                
+                tasksList.appendChild(li)
+                
+              })
+
+              
+
+            }
+          }).catch(function(tasksErr) {
+            console.log(tasksErr)
+          })
+
+
+
+
+         }).catch(function(err) {
+          console.log(err)
+         })
+
+        })
+      } else {
+        window.location.href = 'http://localhost:8001/users/login.html';
+      }
+  })
+</script>
+  </body>
+</html>
+
+
