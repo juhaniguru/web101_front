@@ -195,6 +195,11 @@
                 li.classList.add('list-group-item')
                 var projectDescriptionTextNode = document.createTextNode(t.description);
                 li.appendChild(projectDescriptionTextNode); // create the basic listitem
+                if(t.done == 1)
+                {
+                  li.classList.add('done');
+                  li.classList.add('disabled')
+                }
 
                 if(project.manager_id == authUser.id || authUser.role == 'admin') // if admin or owner of the project, add checkbox and respective listeners
                 {
@@ -204,18 +209,12 @@
                   checkbox.classList.add('input');
                   checkbox.classList.add('float-right')
                   checkbox.value = t.id
+                  checkbox.checked = t.done == 0 ? false : true;
 
                   checkbox.addEventListener('change', function(e) { // to toggle done of a task
                       var done = e.target.checked === true ? 1 : 0;
                       axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {done}, headers).then(function(toggleDoneRes) {
-                         if(done == 1)
-                         {
-                            li.classList.add('done')
-                            li.classList.add('disabled')
-                         } else {
-                          li.classList.remove('done')
-                          li.classList.remove('disabled')
-                         }
+                         init(project.id, headers, project, authUser)
                       }).catch(function(toggleDoneErr) {
                         console.log(toggleDoneErr);
                       })
@@ -226,8 +225,8 @@
 
                    // e.stopPropagation();
 
-                    if(authUser.id == project.manager_id || authUser.role == 'admin')
-                    {
+                    //if(authUser.id == project.manager_id || authUser.role == 'admin')
+                    //{
 
                       var i = document.createElement('i');
 
@@ -269,26 +268,10 @@
                         li.appendChild(editTaskDescriptionForm);
 
                       }); */
-                      if(t.isEditable !== true)
-                      {
-                        li.appendChild(i)
-                      }
 
 
-                      li.addEventListener('mouseleave', function(e){ // to remove pen from list item
 
-                      
-
-                        var i = this.querySelector('.fas');
-                        if(i != null)
-                        {
-                          li.removeChild(i)
-                        }
-                    
-                    })
-
-
-                    i.addEventListener('click', function(){
+                       i.addEventListener('click', function(){
 
 
 
@@ -324,10 +307,32 @@
                         li.appendChild(editTaskDescriptionForm);
                         
                         
-                      });  
+                      });
+
+                      
+                      if(t.isEditable !== true && t.done == 0)
+                      {
+                        li.appendChild(i)
+                      }
+
+
+                      li.addEventListener('mouseleave', function(e){ // to remove pen from list item
+
+                      
+
+                        var i = this.querySelector('.fas');
+                        if(i != null)
+                        {
+                          li.removeChild(i)
+                        }
+                    
+                    })
+
 
                      
-                    } // if(project.manager_id == authUser.id || authUser.role == 'admin')
+
+                     
+                  //  } // if(project.manager_id == authUser.id || authUser.role == 'admin')
 
 
                     
@@ -344,7 +349,7 @@
 
 
 
-                } 
+              } // if(project.manager_id == authUser.id || authUser.role == 'admin')
                 
                 tasksList.appendChild(li)
                 
@@ -352,7 +357,7 @@
 
               
 
-            }
+            } // if projexts.length == 0 else
           }).catch(function(tasksErr) {
             console.log(tasksErr)
           })
