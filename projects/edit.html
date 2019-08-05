@@ -82,8 +82,8 @@
 
       
       <div class="form-group">
-        <label for="taskDescription">New Description</label>
-        <input type="text" class="form-control" id="taskDescription" placeholder="New Description" required>
+        <label for="taskDescription">New Task</label>
+        <input type="text" class="form-control" id="taskDescription" placeholder="New Task" required>
       </div>
       
       <button type="submit" class="btn btn-primary btn-sm">Submit</button>
@@ -110,6 +110,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 <script type="text/javascript" src="../auth.js"></script>
+<script type="text/javascript" src="../projects.js"></script>
 
 <script>
 
@@ -127,16 +128,18 @@
 
         auth.user(function(authUser) {
 
-          var headers = {
+          projects.authUser = authUser
+
+          projects.headers = {
             headers: {Authorization: `Bearer ${window.localStorage.getItem('token')}`}
           };
 
           var urlParams = new URLSearchParams(window.location.search);
-          var projectId = urlParams.get('project');
+          projects.projectId = urlParams.get('project');
 
-         axios.get(`http://localhost:8000/api/projects/${projectId}`, headers).then(function(projectRes) {
+         axios.get(`http://localhost:8000/api/projects/${projects.projectId}`, projects.headers).then(function(projectRes) {
           
-          var project = projectRes.data;
+          projects.project = projectRes.data;
 
           var editProjectForm = document.querySelector("#editProjectForm");
           console.log(editProjectForm)
@@ -144,12 +147,12 @@
           editProjectForm.addEventListener('submit', function(e) {
            
             e.preventDefault();
-            updateProjet(project);
+            updateProjet(projects.project);
           }) 
 
 
-          document.querySelector("#name").value = project.name;
-          document.querySelector("#description").value = project.description;
+          document.querySelector("#name").value = projects.project.name;
+          document.querySelector("#description").value = projects.project.description;
 
 
 
@@ -162,9 +165,10 @@
 
             var description = this.querySelector('#taskDescription').value;
 
-            axios.post(`http://localhost:8000/api/projects/${project.id}/tasks`, {description}, headers).then(function(addTaskRes){
+            axios.post(`http://localhost:8000/api/projects/${projects.project.id}/tasks`, {description}, projects.headers).then(function(addTaskRes){
                 addTaskForm.querySelector("#taskDescription").value = '';
-                init(project.id, headers, project, authUser)
+                //init(project.id, headers, project, authUser)
+                projects.getTasks();
             }).catch(function(addTaskErr) {
               console.log(addTaskErr)
             })
@@ -173,7 +177,8 @@
           })
 
 
-          init(project.id, headers, project, authUser);
+          //init(project.id, headers, project, authUser);
+          projects.getTasks();
 
 
 
@@ -189,6 +194,8 @@
   })
 
   
+
+  
   var updateProjet = function(project)
   {
     var name = document.querySelector("#name").value;
@@ -197,192 +204,8 @@
     console.log(project.id, name, description)
   }
 
-  var init = function(projectId, headers, project, authUser)
-  {
-    axios.get(`http://localhost:8000/api/projects/${projectId}/tasks`, headers).then(function(tasksRes) {
-            let tasks = tasksRes.data;
-
-
-
-            if(tasks.length == 0) // show placeholder text if no tasks
-            {
-              document.querySelector("#placeholder").innerText = 'No tasks'
-            } else 
-            {
-              var tasksList = document.querySelector(".list-group")
-              tasksList.innerHTML = '';
-             tasks.forEach(function(t) {
-                var li =  document.createElement('li');
-                li.classList.add('list-group-item')
-                var projectDescriptionTextNode = document.createTextNode(t.description);
-                li.appendChild(projectDescriptionTextNode); // create the basic listitem
-                if(t.done == 1)
-                {
-                  li.classList.add('done');
-                  li.classList.add('disabled')
-                }
-
-                if(project.manager_id == authUser.id || authUser.role == 'admin') // if admin or owner of the project, add checkbox and respective listeners
-                {
-                  var checkbox = document.createElement('input');
-                  checkbox.type = 'checkbox';
-
-                  checkbox.classList.add('input');
-                  checkbox.classList.add('float-right')
-                  checkbox.value = t.id
-                  checkbox.checked = t.done == 0 ? false : true;
-
-                  checkbox.addEventListener('change', function(e) { // to toggle done of a task
-                      var done = e.target.checked === true ? 1 : 0;
-                      axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {done}, headers).then(function(toggleDoneRes) {
-                         init(project.id, headers, project, authUser)
-                      }).catch(function(toggleDoneErr) {
-                        console.log(toggleDoneErr);
-                      })
-                      
-                  });
-
-                  li.addEventListener('mouseenter', function(e) { // to show pen in list-item
-
-                   // e.stopPropagation();
-
-                    //if(authUser.id == project.manager_id || authUser.role == 'admin')
-                    //{
-
-                      var i = document.createElement('i');
-
-                      i.classList.add('fas');
-                      i.classList.add('fa-pen');
-                      i.classList.add('float-right')
-                      i.classList.add('margin-right-1')
-
-                    /*  i.addEventListener('click', function(){
-                        t.isEditable = true
-                        var editTaskDescriptionForm = document.createElement('form')
-                        var textInput = document.createElement('input')
-                        textInput.type = 'text';
-                        textInput.classList.add('form-control')
-                        textInput.value = t.description;
-                        editTaskDescriptionForm.appendChild(textInput)
-
-                        editTaskDescriptionForm.addEventListener('submit', function(e) {
-                          e.preventDefault();
-
-                          axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {description: textInput.value}, headers).then(function() {
-                            init(project.id, headers, project, authUser)
-                          }).catch(function(patchTaskErr) {
-                            console.log(patchTaskErr)
-                          })
-                           
-
-                           
-                        });
-
-                        textInput.addEventListener('keyup', function(e) { // listen to esc key stroke to cancel editing the task
-                          if(e.keyCode == 27){
-                            console.log("cancel")
-                          }
-                        })
-
-
-                        li.innerHTML = '';
-                        li.appendChild(editTaskDescriptionForm);
-
-                      }); */
-
-
-
-                       i.addEventListener('click', function(){
-
-
-
-                        t.isEditable = true
-                        var editTaskDescriptionForm = document.createElement('form')
-                        var textInput = document.createElement('input')
-                        textInput.type = 'text';
-                        textInput.classList.add('form-control')
-                        textInput.value = t.description;
-                        editTaskDescriptionForm.appendChild(textInput)
-
-                        editTaskDescriptionForm.addEventListener('submit', function(e) {
-                          e.preventDefault();
-
-                          axios.patch(`http://localhost:8000/api/projects/${project.id}/tasks/${t.id}`, {description: textInput.value}, headers).then(function() {
-                            init(project.id, headers, project, authUser)
-                          }).catch(function(patchTaskErr) {
-                            console.log(patchTaskErr)
-                          })
-                           
-
-                           
-                        });
-
-                        textInput.addEventListener('keyup', function(e) { // listen to esc key stroke to cancel editing the task
-                          if(e.keyCode == 27){
-                            init(project.id, headers, project, authUser)
-                          }
-                        })
-
-
-                        li.innerHTML = '';
-                        li.appendChild(editTaskDescriptionForm);
-                        
-                        
-                      });
-
-
-                      if(t.isEditable !== true && t.done == 0)
-                      {
-                        li.appendChild(i)
-                      }
-
-
-                      li.addEventListener('mouseleave', function(e){ // to remove pen from list item
-
-                      
-
-                        var i = this.querySelector('.fas');
-                        if(i != null)
-                        {
-                          li.removeChild(i)
-                        }
-                    
-                    })
-
-
-                     
-
-                     
-                  //  } // if(project.manager_id == authUser.id || authUser.role == 'admin')
-
-
-                    
-
-                });
-
-                  
-
-
-
-                  li.appendChild(checkbox)
-
-
-
-
-
-              } // if(project.manager_id == authUser.id || authUser.role == 'admin')
-                
-                tasksList.appendChild(li)
-                
-              })
-
-              
-
-            } // if projexts.length == 0 else
-          }).catch(function(tasksErr) {
-            console.log(tasksErr)
-          })
-  }
+  //var getTasks = function(projectId, headers, project, authUser)
+  
 
 </script>
   </body>
