@@ -4,10 +4,10 @@ var projects = {
     project: {},
     authUser: {},
     edit: true,
-
+    api: 'http://localhost:8000/api/',
     getTasks: function()
   	{
-		    axios.get(`http://localhost:8000/api/projects/${projects.projectId}/tasks`, projects.headers).then(function(tasksRes) {
+		    axios.get(`${projects.api}projects/${projects.projectId}/tasks`, projects.headers).then(function(tasksRes) {
 		            let tasks = tasksRes.data;
 
 
@@ -42,7 +42,7 @@ var projects = {
 
                   checkbox.addEventListener('change', function(e) { // to toggle done of a task
                       var done = e.target.checked === true ? 1 : 0;
-                      axios.patch(`http://localhost:8000/api/projects/${projects.project.id}/tasks/${t.id}`, {done}, projects.headers).then(function(toggleDoneRes) {
+                      axios.patch(`${prjects.api}projects/${projects.project.id}/tasks/${t.id}`, {done}, projects.headers).then(function(toggleDoneRes) {
                          //init(project.id, headers, project, authUser)
                          projects.getTasks();
                       }).catch(function(toggleDoneErr) {
@@ -87,7 +87,7 @@ var projects = {
 	                        editTaskDescriptionForm.addEventListener('submit', function(e) {
 	                          e.preventDefault();
 
-	                          axios.patch(`http://localhost:8000/api/projects/${projects.project.id}/tasks/${t.id}`, {description: textInput.value}, projects.headers).then(function() {
+	                          axios.patch(`${projects.api}projects/${projects.project.id}/tasks/${t.id}`, {description: textInput.value}, projects.headers).then(function() {
 	                            //init(project.id, headers, project, authUser)
 	                            projects.getTasks();
 	                          }).catch(function(patchTaskErr) {

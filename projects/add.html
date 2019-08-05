@@ -21,29 +21,8 @@
 
   <body>
 
-    <header>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Navbar</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Features</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pricing</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#">Disabled</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+    <header id="navcontainer">
+        
     </header>
 
     <main role="main">
@@ -62,6 +41,7 @@
   </div>
   
   <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+  <a href="/projects/" type="button" class="btn btn-sm btn-primary">Back</a>
 </form>  	
 
       </div>
@@ -85,6 +65,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 <script type="text/javascript" src="../auth.js"></script>
+<script type="text/javascript" src="../projects.js"></script>
 
 <script>
 
@@ -96,6 +77,12 @@
 		{
 			auth.user(function(authUser) {
 
+        axios.get('/nav.html').then(function(nav) {
+          document.querySelector('#navcontainer').innerHTML = nav.data;
+        }).catch(function(navErr) {
+
+        })
+
 				var form = document.querySelector('form');
 
 				form.addEventListener('submit', function(e) {
@@ -104,14 +91,14 @@
 					var name = form.querySelector('#name').value;
 					var description = form.querySelector('#description').value;
 
-					axios.post('http://localhost:8000/api/projects', {name, description}, {headers: {Authorization: 'Bearer ' + token}}).then(function(addProjectRes){window.location.href = 'http://localhost:8001/projects/'}).catch(function(err) {
+					axios.post(`${projects.api}projects`, {name, description}, {headers: {Authorization: 'Bearer ' + token}}).then(function(addProjectRes){window.location.href = '/projects/'}).catch(function(err) {
 						console.log(err)
 					})
 				})
 			})
 		} else {
 
-			window.location.href = 'http://localhost:8001/users/login.html';
+			window.location.href = '/users/login.html';
 		}
 		
 

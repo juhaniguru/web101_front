@@ -21,29 +21,8 @@
 
   <body>
 
-    <header>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Navbar</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Features</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pricing</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#">Disabled</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+    <header id="navcontainer">
+     
     </header>
 
     <main role="main">
@@ -60,6 +39,7 @@
             <input class="input form-control" type="text" id="description" placeholder="project description" required />
           </p>
           <button type="submit" class="btn btn-sm btn-primary">Update</button>
+
         </form>
 
         <hr>
@@ -87,6 +67,7 @@
       </div>
       
       <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+      <a href="/projects/" type="button" class="btn btn-sm btn-primary">Back</a>
     </form>
 
       </div>
@@ -130,6 +111,12 @@
 
           projects.authUser = authUser
 
+          axios.get('/nav.html').then(function(nav) {
+          document.querySelector('#navcontainer').innerHTML = nav.data;
+        }).catch(function(navErr) {
+
+        })
+
           projects.headers = {
             headers: {Authorization: `Bearer ${window.localStorage.getItem('token')}`}
           };
@@ -147,7 +134,7 @@
           editProjectForm.addEventListener('submit', function(e) {
            
             e.preventDefault();
-            updateProjet(projects.project);
+            updateProjet();
           }) 
 
 
@@ -165,7 +152,7 @@
 
             var description = this.querySelector('#taskDescription').value;
 
-            axios.post(`http://localhost:8000/api/projects/${projects.project.id}/tasks`, {description}, projects.headers).then(function(addTaskRes){
+            axios.post(`${projects.api}projects/${projects.project.id}/tasks`, {description}, projects.headers).then(function(addTaskRes){
                 addTaskForm.querySelector("#taskDescription").value = '';
                 //init(project.id, headers, project, authUser)
                 projects.getTasks();
@@ -189,19 +176,23 @@
 
         })
       } else {
-        window.location.href = 'http://localhost:8001/users/login.html';
+        window.location.href = '/users/login.html';
       }
   })
 
   
 
   
-  var updateProjet = function(project)
+  var updateProjet = function()
   {
     var name = document.querySelector("#name").value;
     var description = document.querySelector('#description').value;
-
-    console.log(project.id, name, description)
+    console.log("hep")
+    axios.patch(`${projects.api}projects/${projects.project.id}`, {name, description}, projects.headers).then(function(updateProjectRes) {
+      console.log(updateProjectRes.data)
+    }).catch(function(err) {
+      console.log(err)
+    })
   }
 
   //var getTasks = function(projectId, headers, project, authUser)

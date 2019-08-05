@@ -1,9 +1,10 @@
 
 var auth = {
 
+	api: 'http://localhost:8000/api/',
 	user: function(successCallback)
 	{
-		axios.get('http://localhost:8000/api/user', {
+		axios.get(`${auth.api}user`, {
 			headers: {
 				Authorization: 'Bearer ' + window.localStorage.getItem('token')
 			}
@@ -11,7 +12,7 @@ var auth = {
 			successCallback(authUser.data);
 		}).catch(function(err) {
 			console.log(err)
-			window.location.href = 'http://localhost:8001/users/login.html'
+			window.location.href = '/users/login.html'
 		})
 	}
 }
