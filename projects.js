@@ -42,7 +42,7 @@ var projects = {
 
                   checkbox.addEventListener('change', function(e) { // to toggle done of a task
                       var done = e.target.checked === true ? 1 : 0;
-                      axios.patch(`${prjects.api}projects/${projects.project.id}/tasks/${t.id}`, {done}, projects.headers).then(function(toggleDoneRes) {
+                      axios.patch(`${projects.api}projects/${projects.project.id}/tasks/${t.id}`, {done}, projects.headers).then(function(toggleDoneRes) {
                          //init(project.id, headers, project, authUser)
                          projects.getTasks();
                       }).catch(function(toggleDoneErr) {
